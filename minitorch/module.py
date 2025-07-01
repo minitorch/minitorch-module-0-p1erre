@@ -35,7 +35,7 @@ class Module:
         self.training = True
         for m in self.modules():
             m.train()
-        
+
     def eval(self) -> None:
         """Set the mode of this module and all descendent modules to `eval`."""
         # TODO: Implement for Task 0.4.
@@ -52,12 +52,14 @@ class Module:
 
         """
         # TODO: Implement for Task 0.4.
-        
+
         parameters = list(self._parameters.items())
-        
-        for name, module in  self._modules.items():
-            parameters.extend([ (f'{name}.{n}', p) for n, p in module.named_parameters()])
-        
+
+        for name, module in self._modules.items():
+            parameters.extend(
+                [(f"{name}.{n}", p) for n, p in module.named_parameters()]
+            )
+
         return parameters
 
     def parameters(self) -> Sequence[Parameter]:
@@ -67,7 +69,6 @@ class Module:
         for m in self._modules.values():
             parameters.extend(m.parameters())
         return parameters
-
 
     def add_parameter(self, k: str, v: Any) -> Parameter:
         """Manually add a parameter. Useful helper for scalar parameters.
@@ -103,6 +104,7 @@ class Module:
         return None
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:
+        """Runs forward pass with arguments"""
         return self.forward(*args, **kwargs)
 
     def __repr__(self) -> str:

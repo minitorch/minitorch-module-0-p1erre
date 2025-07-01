@@ -143,24 +143,31 @@ def test_distribute(x: float, y: float, z: float) -> None:
     :math:`z \times (x + y) = z \times x + z \times y`
     """
     # TODO: Implement for Task 0.2.
-    assert_close(mul(z, add(x,y)), mul(z, x) + mul(z, y))
+    assert_close(mul(z, add(x, y)), mul(z, x) + mul(z, y))
 
 
 @pytest.mark.task0_2
 @given(small_floats, small_floats)
 def test_other(x: float, y: float) -> None:
     """Write a test that ensures some other property holds for your functions."""
+
     # TODO: Implement for Task 0.2.
+    def df(f: Callable[[float], float], x: float) -> float:
+        return (f(x + h) - f(x - h)) / (2 * h)
+
     h = 1e-5
-    df = lambda f,x:  (f(x + h) - f(x - h)) / (2 * h)
-    
+
     # inv
     assert is_close(x, 0) or is_close(y * df(inv, x), inv_back(x, y))
     # log
     assert x <= 0 or is_close(x, 0) or is_close(y * df(log, x), log_back(x, y))
     # relu
     assert x != 0 or relu_back(x, 1) == 0
-    assert not (x != 0 and is_close(x, 0)) or (x > 0 and relu_back(x, 1) == 1) or (x < 0 and relu_back(x, 1) == 0)
+    assert (
+        not (x != 0 and is_close(x, 0))
+        or (x > 0 and relu_back(x, 1) == 1)
+        or (x < 0 and relu_back(x, 1) == 0)
+    )
     assert is_close(x, 0) or is_close(y * df(relu, x), relu_back(x, y))
 
 
