@@ -16,11 +16,13 @@ from minitorch.operators import (
     log_back,
     lt,
     max,
+    is_close,
     mul,
     neg,
     negList,
     prod,
     relu,
+    log,
     relu_back,
     sigmoid,
 )
@@ -108,7 +110,12 @@ def test_sigmoid(a: float) -> None:
     * It is  strictly increasing.
     """
     # TODO: Implement for Task 0.2.
-    raise NotImplementedError("Need to implement for Task 0.2")
+    assert sigmoid(0) == 0.5
+    delta = 1e-6
+    y = sigmoid(a)
+    assert 0 <= y <= 1
+    assert_close(1 - y, sigmoid(-a))
+    assert (sigmoid(a + delta) - y) >= 0
 
 
 @pytest.mark.task0_2
@@ -116,32 +123,52 @@ def test_sigmoid(a: float) -> None:
 def test_transitive(a: float, b: float, c: float) -> None:
     """Test the transitive property of less-than (a < b and b < c implies a < c)"""
     # TODO: Implement for Task 0.2.
-    raise NotImplementedError("Need to implement for Task 0.2")
+    assert not (lt(a, b) and lt(b, c)) or lt(a, c)
 
 
 @pytest.mark.task0_2
-def test_symmetric() -> None:
+@given(small_floats, small_floats)
+def test_symmetric(a: float, b: float) -> None:
     """Write a test that ensures that :func:`minitorch.operators.mul` is symmetric, i.e.
     gives the same value regardless of the order of its input.
     """
     # TODO: Implement for Task 0.2.
-    raise NotImplementedError("Need to implement for Task 0.2")
+    assert mul(a, b) == mul(b, a)
 
 
 @pytest.mark.task0_2
-def test_distribute() -> None:
+@given(small_floats, small_floats, small_floats)
+def test_distribute(x: float, y: float, z: float) -> None:
     r"""Write a test that ensures that your operators distribute, i.e.
     :math:`z \times (x + y) = z \times x + z \times y`
     """
     # TODO: Implement for Task 0.2.
-    raise NotImplementedError("Need to implement for Task 0.2")
+    assert_close(mul(z, add(x, y)), mul(z, x) + mul(z, y))
 
 
 @pytest.mark.task0_2
-def test_other() -> None:
+@given(small_floats, small_floats)
+def test_other(x: float, y: float) -> None:
     """Write a test that ensures some other property holds for your functions."""
+
     # TODO: Implement for Task 0.2.
-    raise NotImplementedError("Need to implement for Task 0.2")
+    def df(f: Callable[[float], float], x: float) -> float:
+        return (f(x + h) - f(x - h)) / (2 * h)
+
+    h = 1e-5
+
+    # inv
+    assert is_close(x, 0) or is_close(y * df(inv, x), inv_back(x, y))
+    # log
+    assert x <= 0 or is_close(x, 0) or is_close(y * df(log, x), log_back(x, y))
+    # relu
+    assert x != 0 or relu_back(x, 1) == 0
+    assert (
+        not (x != 0 and is_close(x, 0))
+        or (x > 0 and relu_back(x, 1) == 1)
+        or (x < 0 and relu_back(x, 1) == 0)
+    )
+    assert is_close(x, 0) or is_close(y * df(relu, x), relu_back(x, y))
 
 
 # ## Task 0.3  - Higher-order functions
@@ -169,7 +196,7 @@ def test_sum_distribute(ls1: List[float], ls2: List[float]) -> None:
     is the same as the sum of each element of `ls1` plus each element of `ls2`.
     """
     # TODO: Implement for Task 0.3.
-    raise NotImplementedError("Need to implement for Task 0.3")
+    assert_close(sum(ls1) + sum(ls2), sum(addLists(ls1, ls2)))
 
 
 @pytest.mark.task0_3
